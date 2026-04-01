@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Faixa Cards PRIMETOUR</title>
+<style>
+:root{
+  --prime:#242362;
+  --oceano:#4577a9;
+  --nativo:#2d6667;
+  --agua:#66c6bd;
+  --laranja:#ef7a52;
+  --burgundy:#6a2c3f;
+  --chumbo:#4a4949;
+  --radius:2px;
+  --gap:16px;
+  --sidePad:54px;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  padding:0;
+  background:transparent;
+  overflow:hidden;
+}
+body{
+  padding:8px 0 12px;
+  font-family:"Segoe UI", Arial, sans-serif;
+}
+.wrap{
+  max-width:1280px;
+  margin:auto;
+  position:relative;
+  padding:0 var(--sidePad);
+}
+.viewport{
+  overflow:hidden;
+}
+.track{
+  display:flex;
+  gap:var(--gap);
+  will-change:transform;
+}
+.card{
+  border-radius:var(--radius);
+  display:flex;
+  align-items:center;
+  padding:18px 20px;
+  color:#fff;
+  min-height:144px;
+}
+.theme-prime{background:linear-gradient(135deg,var(--prime),var(--oceano))}
+.theme-oceano{background:linear-gradient(135deg,var(--oceano),var(--prime))}
+.theme-nativo{background:linear-gradient(135deg,var(--nativo),var(--agua))}
+.theme-laranja{background:linear-gradient(135deg,var(--laranja),#d96745)}
+.theme-burgundy{background:linear-gradient(135deg,var(--burgundy),#8b3951)}
+.theme-chumbo{background:linear-gradient(135deg,var(--chumbo),#666565)}
+.media{
+  width:74px;
+  height:74px;
+  border-radius:50%;
+  overflow:hidden;
+  border:2px solid rgba(255,255,255,.75);
+  flex-shrink:0;
+}
+.media img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.content{
+  margin-left:16px;
+  min-width:0;
+}
+.tag{
+  font-size:11px;
+  font-weight:600;
+  background:rgba(255,255,255,.18);
+  padding:4px 10px;
+  border-radius:20px;
+  display:inline-block;
+  margin-bottom:9px;
+  line-height:1;
+}
+.title{
+  font-size:15px;
+  font-weight:700;
+  margin:0 0 6px;
+  line-height:1.25;
+}
+.text{
+  font-size:12px;
+  font-weight:400;
+  opacity:.94;
+  margin:0;
+  line-height:1.45;
+  max-width:28ch;
+}
+.nav{
+  position:absolute;
+  left:0;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  z-index:5;
+  pointer-events:none;
+}
+.btn{
+  pointer-events:auto;
+  background:#fff;
+  border:none;
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  cursor:pointer;
+  font-weight:700;
+  font-size:18px;
+  color:var(--prime);
+  box-shadow:0 4px 12px rgba(0,0,0,.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.dots{
+  text-align:center;
+  margin-top:12px;
+  line-height:0;
+}
+.dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#ccc;
+  border:none;
+  margin:0 4px;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+.dot.active{
+  width:18px;
+  border-radius:20px;
+  background:#242362;
+}
+@media(max-width:1100px){
+  :root{ --sidePad:54px; }
+  .card{ min-height:140px; }
+}
+@media(max-width:900px){
+  :root{ --sidePad:44px; }
+  .card{ min-height:138px; }
+}
+@media(max-width:600px){
+  :root{ --sidePad:36px; --gap:12px; }
+  .card{ min-height:132px; padding:16px; }
+  .media{ width:64px; height:64px; }
+  .content{ margin-left:14px; }
+  .title{ font-size:14px; }
+  .text{ font-size:12px; }
+  .btn{ width:30px; height:30px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="slider">
+  <div class="viewport">
+    <div class="track" id="track"></div>
+  </div>
+
+  <div class="nav">
+    <button class="btn" id="prev" aria-label="Anterior">‹</button>
+    <button class="btn" id="next" aria-label="Próximo">›</button>
+  </div>
+
+  <div class="dots" id="dots"></div>
+</div>
+
+<script>
+const cards = [
+{
+  theme:'theme-prime',
+  tag:'É festa!',
+  title:'Reconhecer também é comunicar',
+  text:'Uma mensagem bem colocada muda o clima do dia.',
+  image:'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=500&q=80'
+},
+{
+  theme:'theme-oceano',
+  tag:'Dica',
+  title:'Menos abas, mais foco',
+  text:'Você não precisa resolver tudo hoje.',
+  image:'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=500&q=80'
+},
+{
+  theme:'theme-nativo',
+  tag:'Cultura',
+  title:'Pequenos rituais',
+  text:'Celebrar pequenas vitórias fortalece o time.',
+  image:'https://images.unsplash.com/photo-1511988617509-a57c8a288659?auto=format&fit=crop&w=500&q=80'
+},
+{
+  theme:'theme-laranja',
+  tag:'Sorte do dia',
+  title:'Hoje flui',
+  text:'Algo simples pode render mais do que parece.',
+  image:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=500&q=80'
+},
+{
+  theme:'theme-burgundy',
+  tag:'Comunicado',
+  title:'Visibilidade importa',
+  text:'Compartilhe o que você construiu.',
+  image:'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=500&q=80'
+},
+{
+  theme:'theme-chumbo',
+  tag:'Time',
+  title:'Conexões importam',
+  text:'Uma conversa pode resolver muito.',
+  image:'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=500&q=80'
+}
+];
+
+const slider = document.getElementById('slider');
+const track = document.getElementById('track');
+const dotsWrap = document.getElementById('dots');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+
+let perView = getPerView();
+let pages = Math.ceil(cards.length / perView);
+let currentPage = 0;
+let autoplay;
+let animating = false;
+
+function getPerView(){
+  if(window.innerWidth <= 900) return 2;
+  return 3;
+}
+function getPageItems(page){
+  const start = page * perView;
+  const items = [];
+  for(let i=0;i<perView;i++){
+    items.push(cards[(start + i) % cards.length]);
+  }
+  return items;
+}
+function renderCards(items){
+  return items.map(c => `
+    <div class="card ${c.theme}">
+      <div class="media"><img src="${c.image}" alt="${c.title}"></div>
+      <div class="content">
+        <div class="tag">${c.tag}</div>
+        <div class="title">${c.title}</div>
+        <div class="text">${c.text}</div>
+      </div>
+    </div>
+  `).join('');
+}
+function setCardWidths(){
+  const sidePad = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sidePad'));
+  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
+  const wrapWidth = slider.querySelector('.wrap') ? slider.querySelector('.wrap').clientWidth : slider.clientWidth;
+  const available = slider.clientWidth - (sidePad * 2);
+  const cardWidth = perView === 3 ? (available - gap * 2) / 3 : (available - gap) / 2;
+  track.querySelectorAll('.card').forEach(card => {
+    card.style.flex = `0 0 ${cardWidth}px`;
+  });
+}
+function renderPage(initial=false){
+  const items = getPageItems(currentPage);
+  track.innerHTML = renderCards(items);
+  setCardWidths();
+  track.style.transition = initial ? 'none' : 'transform .55s ease';
+  track.style.transform = 'translateX(0)';
+  updateDots();
+}
+function renderDots(){
+  dotsWrap.innerHTML = '';
+  for(let i=0;i<pages;i++){
+    const dot = document.createElement('button');
+    dot.className = 'dot' + (i === currentPage ? ' active' : '');
+    dot.setAttribute('aria-label', 'Ir para grupo ' + (i+1));
+    dot.addEventListener('click', () => {
+      if(i === currentPage || animating) return;
+      animateTo(i > currentPage ? 1 : -1, i);
+      restart();
+    });
+    dotsWrap.appendChild(dot);
+  }
+}
+function updateDots(){
+  [...dotsWrap.children].forEach((dot,i) => {
+    dot.classList.toggle('active', i === currentPage);
+  });
+}
+function animateTo(direction, targetPage){
+  if(animating) return;
+  animating = true;
+  const currentItems = getPageItems(currentPage);
+  const nextItems = getPageItems(targetPage);
+  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
+  const sidePad = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sidePad'));
+  const available = slider.clientWidth - (sidePad * 2);
+  const cardWidth = perView === 3 ? (available - gap * 2) / 3 : (available - gap) / 2;
+  const pageWidth = (cardWidth * perView) + (gap * (perView - 1));
+
+  track.innerHTML = renderCards(direction === 1 ? currentItems.concat(nextItems) : nextItems.concat(currentItems));
+  track.querySelectorAll('.card').forEach(card => {
+    card.style.flex = `0 0 ${cardWidth}px`;
+  });
+
+  track.style.transition = 'none';
+  track.style.transform = direction === 1 ? 'translateX(0)' : `translateX(-${pageWidth + gap}px)`;
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      track.style.transition = 'transform .55s ease';
+      track.style.transform = direction === 1 ? `translateX(-${pageWidth + gap}px)` : 'translateX(0)';
+    });
+  });
+
+  const done = () => {
+    track.removeEventListener('transitionend', done);
+    currentPage = targetPage;
+    renderPage(true);
+    animating = false;
+  };
+  track.addEventListener('transitionend', done);
+  updateDotsTemp(targetPage);
+}
+function updateDotsTemp(targetPage){
+  [...dotsWrap.children].forEach((dot,i) => {
+    dot.classList.toggle('active', i === targetPage);
+  });
+}
+function next(){
+  const target = (currentPage + 1) % pages;
+  animateTo(1, target);
+}
+function prev(){
+  const target = (currentPage - 1 + pages) % pages;
+  animateTo(-1, target);
+}
+function start(){
+  stop();
+  autoplay = setInterval(next, 4000);
+}
+function stop(){
+  if(autoplay) clearInterval(autoplay);
+}
+function restart(){
+  start();
+}
+
+prevBtn.addEventListener('click', () => { prev(); restart(); });
+nextBtn.addEventListener('click', () => { next(); restart(); });
+slider.addEventListener('mouseenter', stop);
+slider.addEventListener('mouseleave', start);
+
+window.addEventListener('resize', () => {
+  const newPerView = getPerView();
+  perView = newPerView;
+  pages = Math.ceil(cards.length / perView);
+  if(currentPage > pages - 1) currentPage = 0;
+  renderDots();
+  renderPage(true);
+});
+
+renderDots();
+renderPage(true);
+start();
+</script>
+</body>
+</html>
