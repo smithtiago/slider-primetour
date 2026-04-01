@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --prime:#242362;
+  --oceano:#4577a9;
+  --nativo:#2d6667;
+  --agua:#66c6bd;
+  --laranja:#ef7a52;
+  --burgundy:#6a2c3f;
+  --chumbo:#4a4949;
+
+  --radius:2px;
+  --gap:16px;
+  --cardW: calc((100% - (var(--gap) * 2)) / 3);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  padding:8px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background:transparent;
+  overflow:hidden;
+}
+
+.wrap{
+  max-width:1280px;
+  margin:auto;
+  position:relative;
+}
+
+.viewport{
+  overflow:hidden;
+}
+
+.track{
+  display:flex;
+  gap:var(--gap);
+  transition:.5s;
+}
+
+.card{
+  flex:0 0 var(--cardW);
+  min-height:160px;
+  border-radius:var(--radius);
+  display:flex;
+  align-items:center;
+  padding:20px;
+  color:#fff;
+}
+
+.theme-prime{background:linear-gradient(135deg,var(--prime),var(--oceano))}
+.theme-oceano{background:linear-gradient(135deg,var(--oceano),var(--prime))}
+.theme-nativo{background:linear-gradient(135deg,var(--nativo),var(--agua))}
+.theme-laranja{background:linear-gradient(135deg,var(--laranja),#d96745)}
+.theme-burgundy{background:linear-gradient(135deg,var(--burgundy),#8b3951)}
+.theme-chumbo{background:linear-gradient(135deg,var(--chumbo),#666)}
+
+.media{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  overflow:hidden;
+  border:2px solid rgba(255,255,255,.7);
+  flex-shrink:0;
+}
+
+.media img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.content{
+  margin-left:18px;
+}
+
+.tag{
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.04em;
+  background:rgba(255,255,255,.2);
+  padding:4px 10px;
+  border-radius:20px;
+  display:inline-block;
+  margin-bottom:8px;
+}
+
+.title{
+  font-size:16px;
+  font-weight:700;
+  margin:0 0 6px;
+}
+
+.text{
+  font-size:13px;
+  font-weight:400;
+  opacity:.9;
+  margin:0;
+}
+
+/* navegação */
+.nav{
+  position:absolute;
+  top:50%;
+  width:100%;
+  transform:translateY(-50%);
+  display:flex;
+  justify-content:space-between;
+  pointer-events:none;
+}
+
+.btn{
+  pointer-events:auto;
+  background:#fff;
+  border:none;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.dots{
+  text-align:center;
+  margin-top:10px;
+}
+
+.dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#ccc;
+  border:none;
+  margin:0 4px;
+}
+
+.dot.active{
+  width:20px;
+  border-radius:20px;
+  background:#242362;
+}
+
+/* responsivo */
+@media(max-width:1000px){
+  :root{--cardW: calc((100% - var(--gap)) / 2);}
+}
+
+@media(max-width:600px){
+  :root{--cardW:100%;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap" id="slider">
+  <div class="viewport">
+    <div class="track" id="track"></div>
+  </div>
+
+  <div class="nav">
+    <button class="btn" id="prev">‹</button>
+    <button class="btn" id="next">›</button>
+  </div>
+
+  <div class="dots" id="dots"></div>
+</div>
+
+<script>
+const cards = [
+{
+  theme:'theme-prime',
+  tag:'É festa!',
+  title:'Reconhecer também é comunicar',
+  text:'Uma mensagem bem colocada muda o clima do dia.',
+  image:'https://images.unsplash.com/photo-1518717758536-85ae29035b6d'
+},
+{
+  theme:'theme-oceano',
+  tag:'Dica',
+  title:'Menos abas, mais foco',
+  text:'Você não precisa resolver tudo hoje.',
+  image:'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd'
+},
+{
+  theme:'theme-nativo',
+  tag:'Cultura',
+  title:'Pequenos rituais',
+  text:'Celebrar pequenas vitórias fortalece o time.',
+  image:'https://images.unsplash.com/photo-1511988617509-a57c8a288659'
+},
+{
+  theme:'theme-laranja',
+  tag:'Sorte do dia',
+  title:'Hoje flui',
+  text:'Algo simples pode render mais do que parece.',
+  image:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085'
+},
+{
+  theme:'theme-burgundy',
+  tag:'Comunicado',
+  title:'Visibilidade importa',
+  text:'Compartilhe o que você construiu.',
+  image:'https://images.unsplash.com/photo-1516321318423-f06f85e504b3'
+},
+{
+  theme:'theme-chumbo',
+  tag:'Time',
+  title:'Conexões importam',
+  text:'Uma conversa pode resolver muito.',
+  image:'https://images.unsplash.com/photo-1521737604893-d14cc237f11d'
+}
+];
+
+const track = document.getElementById('track');
+const dotsWrap = document.getElementById('dots');
+
+let index = 0;
+
+function render(){
+  track.innerHTML = cards.map(c=>`
+    <div class="card ${c.theme}">
+      <div class="media"><img src="${c.image}"></div>
+      <div class="content">
+        <div class="tag">${c.tag}</div>
+        <div class="title">${c.title}</div>
+        <div class="text">${c.text}</div>
+      </div>
+    </div>
+  `).join('');
+
+  dotsWrap.innerHTML = cards.map((_,i)=>
+    `<button class="dot ${i==0?'active':''}" onclick="go(${i})"></button>`
+  ).join('');
+}
+
+function go(i){
+  index=i;
+  update();
+}
+
+function update(){
+  const card = document.querySelector('.card');
+  const gap = 16;
+  const w = card.offsetWidth + gap;
+
+  track.style.transform = `translateX(-${index * w}px)`;
+
+  document.querySelectorAll('.dot').forEach((d,i)=>{
+    d.classList.toggle('active', i===index);
+  });
+}
+
+document.getElementById('next').onclick=()=>{
+  index = (index+1)%cards.length;
+  update();
+};
+
+document.getElementById('prev').onclick=()=>{
+  index = (index-1+cards.length)%cards.length;
+  update();
+};
+
+setInterval(()=>{
+  index = (index+1)%cards.length;
+  update();
+},4000);
+
+render();
+</script>
+
+</body>
+</html>
